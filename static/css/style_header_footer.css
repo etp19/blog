@@ -1,0 +1,127 @@
+img, embed, object, video {
+
+    max-width: 100%;
+}
+
+a {
+
+    transition: all 0.35s;
+}
+p{
+
+    color: white;
+}
+
+
+/*{
+
+    outline: 2px solid red;
+}
+*/
+html, body {
+
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    font-family: Merriweather,'Helvetica Neue',Arial,sans-serif;
+}
+
+header{
+
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-color: #FF5733;
+    width: 100%;
+    position: relative;
+    color: #fff;
+    text-align: center;
+}
+
+.explain {
+
+    margin-top: 10px;
+
+}
+
+footer {
+
+    background-color: #333;
+    background-size: cover;
+    background-position: center;
+    height: 150px;
+}
+
+.advertising {
+
+    background-color: #f05f40;
+    height: 300px;
+}
+
+section {
+    padding-bottom: 15px;
+    display: block;
+}
+
+.fa-bolt, .fa-mobile, .fa-money, .fa-user-circle{
+
+    color: #f05f40;
+}
+
+hr {
+
+    border: 0 none;
+    color: black;
+    height: 2px;
+    background-color: #f05f40;
+    width: 15%;
+
+}
+
+.announce{
+
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 30px;
+    height: 100vh;
+    width: 100%;
+
+
+
+}
+
+
+h1 {
+
+    text-align: center;
+}
+
+img{
+
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.navbar-default{
+
+    background-color: transparent;
+    border: transparent;
+}
+
+.menu {
+
+    height: 100vh;
+    text-align: start;
+}
+
+nav.appear {
+
+    background-color: #333;
+
+}
+
+button {
+
+    color: white;
+}
