@@ -44,7 +44,7 @@ class BlogDB(db.Model):
 
 
 class UsersDB(db.Model):
-    username = db.StringProperty(required=True)
+    username = db.StringProperty(required=False)
     user_email = db.StringProperty()
     user_password = db.StringProperty(required=True)
 
@@ -97,7 +97,6 @@ class SignUp(BlogHandler):
         verify = self.request.get("verify")
         email = self.request.get("email")
         params = dict(username=username, email=email)
-
         if not user_and_password.validate_user(username):
             params['error_username'] = not_valid_user
             have_error = True
@@ -113,9 +112,9 @@ class SignUp(BlogHandler):
             params['error_email'] = not_valid_email
             have_error = True
 
-        users = db.GqlQuery("select * from UsersDB where username = :1", username).get() #take the user info from the database
+        users = db.GqlQuery("select * from UsersDB where username = :1",username).get() #take the user info from the database
 
-        if not users: #see if exist user.
+        if not users:
             secure_pw = security.make_pw_hash(username, password) #hash the password and store it in secure_pw
             put_info = UsersDB(username=username, user_email=email, user_password=secure_pw) #put the information in database
             put_info.put()
@@ -128,17 +127,20 @@ class SignUp(BlogHandler):
 
         else:
             self.response.headers['Content-Type'] = 'text/html'
-            user_id = 0
+            user_id = username
             id_cookie_srt = self.request.cookies.get('user_id')
             if id_cookie_srt:
                 cookie_val = security.test_security(id_cookie_srt)
                 if cookie_val:
-                    user_id = int(cookie_val)
+                    user_id = cookie_val
 
-            user_id += 1
+
             new_cookie_val = security.make_hash(str(user_id))
-            self.response.headers.add_header('Set-Cookie', 'user_id=%s' % new_cookie_val)
-            self.render("welcome.html", username=username)
+            self.response.headers.add_header('Set-Cookie', 'user_id=%s' % new_cookie_val, Path='/')
+            self.redirect('/blog/welcome')
+
+
+
 
 
 class MainPage(BlogHandler):
@@ -146,7 +148,11 @@ class MainPage(BlogHandler):
         self.render("index.html")
 
 
-
+class Welcome(SignUp):
+    def get(self):
+        username = self.request.cookies.get('user_id')
+        user = username.split("|")[0]
+        self.render('welcome.html', username=user)
 
 
 
@@ -154,6 +160,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/?', FrontBlog),
                                ('/blog/([0-9]+)', SeePost),
                                ('/blog/newpost', NewPost),
-                               ('/signup', SignUp)
+                               ('/signup', SignUp),
+                               ('/blog/welcome', Welcome)
                                ],
                               debug=True)
