@@ -44,7 +44,7 @@ class BlogDB(db.Model):
 
 
 class UsersDB(db.Model):
-    username = db.StringProperty(required=False)
+    username = db.StringProperty(required=True)
     user_email = db.StringProperty()
     user_password = db.StringProperty(required=True)
 
@@ -112,7 +112,7 @@ class SignUp(BlogHandler):
             params['error_email'] = not_valid_email
             have_error = True
 
-        users = db.GqlQuery("select * from UsersDB where username = :1",username).get() #take the user info from the database
+        users = db.GqlQuery("select * from UsersDB where username = :1", username).get() #take the user info from the database
 
         if not users:
             secure_pw = security.make_pw_hash(username, password) #hash the password and store it in secure_pw
@@ -151,8 +151,11 @@ class MainPage(BlogHandler):
 class Welcome(SignUp):
     def get(self):
         username = self.request.cookies.get('user_id')
-        user = username.split("|")[0]
-        self.render('welcome.html', username=user)
+        if username and security.test_security(username):
+                user = username.split("|")[0]
+                self.render('welcome.html', username=user)
+        else:
+            self.redirect('/blog/signup')
 
 
 
@@ -160,7 +163,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/?', FrontBlog),
                                ('/blog/([0-9]+)', SeePost),
                                ('/blog/newpost', NewPost),
-                               ('/signup', SignUp),
+                               ('/blog/signup', SignUp),
                                ('/blog/welcome', Welcome)
                                ],
                               debug=True)
