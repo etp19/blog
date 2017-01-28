@@ -46,9 +46,9 @@ def valid_pw(name, pw, h): #this function test if the username and password are 
 h = make_pw_hash('spez', 'hunter2')
 print valid_pw('spez', 'hunter2', h)
 #print make_pw_hash('spez', 'hunter2','PEhRn')
-
-
+print h
 
 #print make_pw_hash("Eduardo", "water875")
 print make_hash("14")
 print test_security("14|2c66b804f0e51f85163afed94161ceef")
+print make_pw_hash("Eduardo12", "12345", "sasas")

@@ -1,5 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-  {{post.render() | safe}}
+  {{post.render()| safe}}
+	<div class="row">
+			<div class="col-md-12">
+				<form method="post">
+					<div class="form-group">
+						<label for="comment">Comments</label>
+						<textarea class="form-control" rows="3" name="comments" id="comment"></textarea>
+					</div>
+					<button class="btn">publish</button>
+				</form>
+
+			</div>
+	</div>
+	<div class="row">
+			<div class="col-md-12">
+				{% for post in comments %}
+					<div>
+						<pre class="litle-padding">{{ post.content }}</pre>
+					</div>
+				{% endfor %}
+			</div>
+	</div>
 {% endblock %}

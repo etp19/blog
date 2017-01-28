@@ -10,14 +10,21 @@
 	<div class="container">
         <div class="row">
 	        <div class="col-md-12 espace-1"></div>
-            <div class="col-md-12">
-                {{ content.blog_title}} :
-            </div>
+                <div class="col-md-6">
+                    <div class="col-md-3">{{ p.subject}} :</div>
+	                <div class="col-md-3"> Created by {{ p.user_post.name}}</div>
+                </div>
+	            <div class="col-md-6 text-right">
+		            {{ p.created}}
+	            </div>
 	        <hr>
             <div class="col-md-12 espace-2">
-                <pre>{{ content._render_text | safe}}</pre>
+                <pre>{{ p._render_text | safe}}</pre>
             </div>
         </div>
+
+
+
 	</div>
 </body>
 

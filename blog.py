@@ -1,169 +1,268 @@
 import os
 import re
 from string import letters
-import user_and_password
-import security
 import webapp2
 import jinja2
+import user_and_password
+import security
 from google.appengine.ext import db
-
-not_valid_pass = "That wasn't a valid password."
-not_valid_user = "That's not a valid username."
-not_valid_email = "That's not a valid email."
-pass_no_match = "Your passwords didn't match."
-user_exist = "This user already exist"
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                autoescape = True)
 
+
 def render_str(template, **params):
     t = jinja_env.get_template(template)
     return t.render(params)
+
 
 class BlogHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
     def render_str(self, template, **params):
+        params['user'] = self.user
         return render_str(template, **params)
 
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
 
+    def set_secure_cookie(self, name, val):
+        cookie_val = security.make_hash(val)
+        self.response.headers.add_header(
+            'Set-Cookie',
+            '%s=%s; Path=/' % (name, cookie_val))
 
-class BlogDB(db.Model):
-    blog_title = db.StringProperty(required=True)
-    blog_content = db.TextProperty(required=True)
-    created = db.DateTimeProperty(auto_now_add=True)
-    last_modified = db.DateTimeProperty(auto_now=True)
+    def read_secure_cookie(self, name):
+        cookie_val = self.request.cookies.get(name)
+        return cookie_val and security.test_security(cookie_val) #return cookie_val, this is a shortcut for if statement.
 
-    def render(self):
-        self._render_text = self.blog_content.replace('\n', '<br>')
-        return render_str("post.html", content = self)
+    def login(self, user):
+        self.set_secure_cookie('user_id', str(user.key().id()))
 
+    def logout(self):
+        self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
-class UsersDB(db.Model):
-    username = db.StringProperty(required=True)
-    user_email = db.StringProperty()
-    user_password = db.StringProperty(required=True)
-
-
-class FrontBlog(BlogHandler):
-    def get(self):
-        posts = db.GqlQuery("select * from BlogDB order by created desc limit 10")
-        self.render("blog.html", posts=posts)
+    def initialize(self, *a, **kw):
+        webapp2.RequestHandler.initialize(self, *a, **kw)
+        uid = self.read_secure_cookie('user_id')
+        self.user = uid and User.by_id(int(uid))
 
 
-class SeePost(BlogHandler):
-    def get(self, post_id):
-        post_key = db.Key.from_path('BlogDB', int(post_id))
-        post = db.get(post_key)
-
-        if not post:
-            self.error(404)
-
-        else:
-            self.render("permalink.html", post=post)
-
-
-class NewPost(BlogHandler):
-    def get(self):
-        self.render("newpost.html")
-
-    def post(self):
-        post_title = self.request.get("title")
-        post_content = self.request.get("content")
-
-        if post_title and post_content:
-            p = BlogDB(blog_title=post_title, blog_content=post_content)
-            p.put()
-            self.redirect('/blog/%s' % str(p.key().id()))
-
-        else:
-            error = "subject and content, please!"
-            self.render("newpost.html", blog_title=post_title, blog_content=post_content, error=error)
-
-
-class SignUp(BlogHandler):
-    def get(self):
-        self.render("signup.html")
-
-
-    def post(self):
-        have_error = False
-        username = self.request.get("username")
-        password = self.request.get("password")
-        verify = self.request.get("verify")
-        email = self.request.get("email")
-        params = dict(username=username, email=email)
-        if not user_and_password.validate_user(username):
-            params['error_username'] = not_valid_user
-            have_error = True
-
-        if not user_and_password.validate_password(password):
-            params['error_password'] = not_valid_pass
-            have_error = True
-        elif password != verify:
-            params['error_verify'] = pass_no_match
-            have_error = True
-
-        if not user_and_password.validate_email(email):
-            params['error_email'] = not_valid_email
-            have_error = True
-
-        users = db.GqlQuery("select * from UsersDB where username = :1", username).get() #take the user info from the database
-
-        if not users:
-            secure_pw = security.make_pw_hash(username, password) #hash the password and store it in secure_pw
-            put_info = UsersDB(username=username, user_email=email, user_password=secure_pw) #put the information in database
-            put_info.put()
-        else:
-            params['error_exist'] = user_exist
-            have_error = True
-
-        if have_error:
-            self.render("signup.html", **params)
-
-        else:
-            self.response.headers['Content-Type'] = 'text/html'
-            user_id = username
-            id_cookie_srt = self.request.cookies.get('user_id')
-            if id_cookie_srt:
-                cookie_val = security.test_security(id_cookie_srt)
-                if cookie_val:
-                    user_id = cookie_val
-
-
-            new_cookie_val = security.make_hash(str(user_id))
-            self.response.headers.add_header('Set-Cookie', 'user_id=%s' % new_cookie_val, Path='/')
-            self.redirect('/blog/welcome')
-
-
-
+def render_post(response, post):
+    response.out.write('<b>' + post.subject + '</b><br>')
+    response.out.write(post.content)
 
 
 class MainPage(BlogHandler):
     def get(self):
-        self.render("index.html")
+            self.render("index.html")
 
 
-class Welcome(SignUp):
+##### user stuff
+
+def users_key(group = 'default'):
+    return db.Key.from_path('users', group)
+
+
+class User(db.Model):
+    name = db.StringProperty(required=True)
+    pw_hash = db.StringProperty(required=True)
+    email = db.StringProperty()
+
+    @classmethod
+    def by_id(cls, uid):
+        return User.get_by_id(uid, parent=users_key())
+
+    @classmethod
+    def by_name(cls, name):
+        u = cls.all().filter('name =', name).get()
+        return u
+
+    @classmethod
+    def register(cls, name, pw, email=None):
+        pw_hash = security.make_pw_hash(name, pw)
+        return cls(parent=users_key(),
+                   name=name,
+                   pw_hash=pw_hash,
+                   email=email)
+
+    @classmethod
+    def login(cls, name, pw):
+        u = cls.by_name(name)
+        if u and security.valid_pw(name, pw, u.pw_hash):
+            return u
+
+
+##### blog stuff
+
+def blog_key(name='default'):
+    return db.Key.from_path('blogs', name)
+
+
+class Post(db.Model):
+    subject = db.StringProperty(required=True)
+    content = db.TextProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
+    last_modified = db.DateTimeProperty(auto_now=True)
+    user_post = db.ReferenceProperty(User, collection_name='users')
+
+    def render(self):
+        self._render_text = self.content.replace('\n', '<br>')
+        return render_str("post.html", p=self)
+
+
+class Reply(db.Model): #check this, it is the database for the comments
+    content = db.StringProperty(required=True)
+    post_info = db.ReferenceProperty(Post, collection_name='posts')
+    created = db.DateTimeProperty(auto_now_add=True)
+    last_modified = db.DateTimeProperty(auto_now=True)
+    user = db.ReferenceProperty(User, collection_name='users1')
+
+
+class BlogFront(BlogHandler):
     def get(self):
-        username = self.request.cookies.get('user_id')
-        if username and security.test_security(username):
-                user = username.split("|")[0]
-                self.render('welcome.html', username=user)
-        else:
-            self.redirect('/blog/signup')
+        posts = db.GqlQuery("select * from Post order by created desc limit 10")
+        self.render("blog.html", posts=posts)
 
+
+class PostPage(BlogHandler): #something must be wrong here, but I cannot figure out what it is. 
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        self.post = db.get(key)
+
+        if not self.post:
+            self.error(404)
+            return
+        comments = db.GqlQuery("select * from Reply order by created desc limit 10")
+        self.render("permalink.html", post=self.post, comments=comments)
+
+    def post(self): # Last updated here...
+        if not self.user:
+            self.redirect('/blog')
+
+        comments = self.request.get('comments')
+        if comments:
+            save_comment = Reply(parent=blog_key(), content=comments, user=self.user, post_info=self.post)
+            save_comment.put()
+            self.redirect('/blog/%s' % str(save_comment.post_info.key().id()))
+            #self.render("permalink.html", post=self.post)
+
+
+class NewPost(BlogHandler):
+    def get(self):
+        if self.user:
+            self.render("newpost.html")
+        else:
+            self.redirect("/blog/login")
+
+    def post(self):
+        if not self.user:
+            self.redirect('/blog')
+
+        subject = self.request.get('title')
+        content = self.request.get('blog_content')
+
+        if subject and content:
+            p = Post(parent=blog_key(), user_post=self.user, subject=subject, content=content)
+            p.put()
+            self.redirect('/blog/%s' % str(p.key().id()))
+        else:
+            error = "subject and content, please!"
+            self.render("newpost.html", subject=subject, blog_content=content, error=error)
+
+
+class Signup(BlogHandler):
+    def get(self):
+        self.render("signup.html")
+
+    def post(self):
+        have_error = False
+        self.username = self.request.get('username')
+        self.password = self.request.get('password')
+        self.verify = self.request.get('verify')
+        self.email = self.request.get('email')
+        params = dict(username=self.username,
+                      email=self.email)
+
+        if not user_and_password.validate_user(self.username):
+            params['error_username'] = "That's not a valid username."
+            have_error = True
+
+        if not user_and_password.validate_password(self.password):
+            params['error_password'] = "That wasn't a valid password."
+            have_error = True
+        elif self.password != self.verify:
+            params['error_verify'] = "Your passwords didn't match."
+            have_error = True
+
+        if not user_and_password.validate_email(self.email):
+            params['error_email'] = "That's not a valid email."
+            have_error = True
+
+        if have_error:
+            self.render('signup.html', **params)
+        else:
+            self.done()
+
+    def done(self, *a, **kw):
+        raise NotImplementedError
+
+
+class Register(Signup):
+    def done(self):
+        #make sure the user doesn't already exist
+        u = User.by_name(self.username)
+        if u:
+            msg = 'That user already exists.'
+            self.render('signup.html', error_username=msg)
+        else:
+            u = User.register(self.username, self.password, self.email)
+            u.put()
+
+            self.login(u)
+            self.redirect('/blog/welcome')
+
+
+class Login(BlogHandler):
+    def get(self):
+        self.render('login.html')
+
+    def post(self):
+        username = self.request.get('username')
+        password = self.request.get('password')
+
+        u = User.login(username, password)
+        if u:
+            self.login(u)
+            self.redirect('/blog/welcome')
+        else:
+            msg = 'Invalid login'
+            self.render('login.html', invalid_login=msg)
+
+
+class Logout(BlogHandler):
+    def get(self):
+        self.logout()
+        self.redirect('/blog/login')
+
+
+class Welcome(BlogHandler):
+    def get(self):
+        if self.user:
+            self.render('welcome.html', username=self.user.name)
+        else:
+            self.redirect('blog/signup')
 
 
 app = webapp2.WSGIApplication([('/', MainPage),
-                               ('/blog/?', FrontBlog),
-                               ('/blog/([0-9]+)', SeePost),
+                               ('/blog/?', BlogFront),
+                               ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPost),
-                               ('/blog/signup', SignUp),
-                               ('/blog/welcome', Welcome)
+                               ('/blog/signup', Register),
+                               ('/logout', Logout),
+                               ('/blog/welcome', Welcome),
+                               ('/blog/login', Login)
                                ],
                               debug=True)

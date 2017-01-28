@@ -28,13 +28,13 @@
                         <a class="page-scroll" href="#"><p>Home</p></a>
                     </li>
                     <li>
-                        <a class="page-scroll" href="/blog" target="_blank"><p>blog</p></a>
+                        <a class="page-scroll" href="/blog" target="_blank"><p>Blog</p></a>
                     </li>
                     <li>
                         <a class="page-scroll" href="/blog/signup" target="_blank"><p>Sign Up</p></a>
                     </li>
                     <li>
-                        <a class="page-scroll"><i class="fa fa-user-circle-o fa-2x" id="open-modal"></i></a>
+                        <a class="page-scroll" href="/blog/login"><i class="fa fa-user-circle-o fa-2x"></i></a>
                     </li>
                 </ul>
             </div>
@@ -47,25 +47,8 @@
                 <div class="col-lg-12 announce">
                     <h1 class="unique">go for it</h1>
 	                <h2 class="unique-2">Learn How to Invest without risk</h2>
-	                <a href="#"><button class="btn unique-3">Get Started</button></a>
+	                <a href="/blog/signup"><button class="btn unique-3">Get Started</button></a>
                 </div>
-                <section id="modal" class="modal fade">
-	                <div class="modal-body">
-		                <form method="post" role="form">
-			                <span id="close" onclick="close();" class="glyphicon glyphicon-remove pull-right"></span>
-			                <div class="form-group">
-				                <label for="email">Email</label>
-				                <input type="email" id="email" class="form-control" placeholder="Enter Username">
-			                </div>
-			                <div class="form-group">
-				                <label for="password">Password</label>
-				                <input type="password" id="password" class="form-control" placeholder="Enter password">
-			                </div>
-			                <button type="submit" class="btn login">Log In</button>
-		                </form>
-	                </div>
-	                
-                </section>
             </div>
         </div>
         
@@ -74,10 +57,10 @@
     </header>
 
     <div class="container-fluid">
-        <section class="row advertising text-center">
+        <section class="row advertising">
             <div class="col-lg-12">
-                <h2>About Our Work</h2>
-                <h4>This is a simulator platform specifically created for individuals who have zero knowledge and want to learn how to invest in the stock market in a fun way and without any risk of loosing real money.</h4>
+                <h2 class="texts1">About Our Work</h2>
+                <h4 class="texts2">This is a simulator platform specifically created for individuals who have zero knowledge and want to learn how to invest in the stock market in a fun way and without any risk of loosing real money.</h4>
             </div>
             </section>
             <div class="col-lg-12 text-center">
@@ -164,23 +147,7 @@
     <script src="../static/js/jquery-3.1.1.min.js"></script>
     <script src="../bootstrap/js/bootstrap.min.js"></script>
     <script src="../static/js/scroll.js"></script>
-	<script>
-		
-		$(document).ready(function () {
 
-$("#open-modal").on('click', function () {
-
-  $("#modal").modal({show:true});
-
-});
-			
-$("#close").on('click', function () {
-	
-	$("#modal").modal('hide');
-});
-
-});
-	</script>
 
 </body>
 </html>
