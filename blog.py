@@ -134,21 +134,22 @@ class PostPage(BlogHandler): #something must be wrong here, but I cannot figure 
         if not post:
             self.error(404)
             return
-        comments = db.GqlQuery("select * from Reply order by created desc limit 10")
+        comments = db.GqlQuery("select * from Reply where post_info = :1 order by created desc limit 10", key)
         self.render("permalink.html", post=post, comments=comments)
 
     def post(self, post_id): # Last updated here...
         if not self.user:
-            self.redirect('/blog')
+            self.redirect('/blog/login')
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
         post = db.get(key)
-
+        error_comment = "The Comment cannot be empty"
         comments = self.request.get('comments')
         if comments:
             save_comment = Reply(parent=blog_key(), content=comments, user=self.user, post_info=post)
             save_comment.put()
             self.redirect('/blog/%s' % str(post.key().id()))
-            #self.render("permalink.html", post=self.post, comments=save_comment)
+        else:
+            self.render("permalink.html", post=post, comments=db.GqlQuery("select * from Reply where post_info = :1 order by created desc limit 10", key), error_comment=error_comment)
 
 
 class NewPost(BlogHandler):

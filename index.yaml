@@ -15,3 +15,9 @@ indexes:
   - name: post
   - name: created
     direction: desc
+
+- kind: Reply
+  properties:
+  - name: post_info
+  - name: created
+    direction: desc
