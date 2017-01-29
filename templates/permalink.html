@@ -4,7 +4,7 @@
   {{post.render()| safe}}
 	<div class="row">
 			<div class="col-md-12">
-				<form method="post">
+				<form action="" method="post" role="form">
 					<div class="form-group">
 						<label for="comment">Comments</label>
 						<textarea class="form-control" rows="3" name="comments" id="comment"></textarea>
@@ -18,7 +18,8 @@
 			<div class="col-md-12">
 				{% for post in comments %}
 					<div>
-						<pre class="litle-padding">{{ post.content }}</pre>
+						<pre class="litle-padding">{{ post.content }}
+						<p> Created by {{ post.user.name }}</p></pre>
 					</div>
 				{% endfor %}
 			</div>

@@ -127,27 +127,28 @@ class BlogFront(BlogHandler):
         self.render("blog.html", posts=posts)
 
 
-class PostPage(BlogHandler): #something must be wrong here, but I cannot figure out what it is. 
+class PostPage(BlogHandler): #something must be wrong here, but I cannot figure out what it is.
     def get(self, post_id):
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-        self.post = db.get(key)
-
-        if not self.post:
+        post = db.get(key)
+        if not post:
             self.error(404)
             return
         comments = db.GqlQuery("select * from Reply order by created desc limit 10")
-        self.render("permalink.html", post=self.post, comments=comments)
+        self.render("permalink.html", post=post, comments=comments)
 
-    def post(self): # Last updated here...
+    def post(self, post_id): # Last updated here...
         if not self.user:
             self.redirect('/blog')
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
 
         comments = self.request.get('comments')
         if comments:
-            save_comment = Reply(parent=blog_key(), content=comments, user=self.user, post_info=self.post)
+            save_comment = Reply(parent=blog_key(), content=comments, user=self.user, post_info=post)
             save_comment.put()
-            self.redirect('/blog/%s' % str(save_comment.post_info.key().id()))
-            #self.render("permalink.html", post=self.post)
+            self.redirect('/blog/%s' % str(post.key().id()))
+            #self.render("permalink.html", post=self.post, comments=save_comment)
 
 
 class NewPost(BlogHandler):
@@ -266,3 +267,4 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/login', Login)
                                ],
                               debug=True)
+
