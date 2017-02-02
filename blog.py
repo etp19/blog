@@ -7,6 +7,7 @@ import user_and_password
 import security
 from google.appengine.ext import db
 
+
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                autoescape = True)
@@ -113,12 +114,18 @@ class Post(db.Model):
         return render_str("post.html", p=self)
 
 
-class Reply(db.Model): #check this, it is the database for the comments
+class Reply(db.Model):#check this, it is the database for the comments
     content = db.StringProperty(required=True)
     post_info = db.ReferenceProperty(Post, collection_name='posts')
     created = db.DateTimeProperty(auto_now_add=True)
     last_modified = db.DateTimeProperty(auto_now=True)
     user = db.ReferenceProperty(User, collection_name='users1')
+
+
+class Likes(db.Model): #start working from here.
+    post_info = db.ReferenceProperty(Post, collection_name='posts1')
+    user = db.ListProperty(item_type=long)
+
 
 
 class BlogFront(BlogHandler):
@@ -135,7 +142,8 @@ class PostPage(BlogHandler): #something must be wrong here, but I cannot figure 
             self.error(404)
             return
         comments = db.GqlQuery("select * from Reply where post_info = :1 order by created desc limit 10", key)
-        self.render("permalink.html", post=post, comments=comments)
+        like = db.GqlQuery("select * from Likes where post_id="+post_id)
+        self.render("permalink.html", post=post, comments=comments, like=like)
 
     def post(self, post_id): # Last updated here...
         if not self.user:
@@ -143,13 +151,23 @@ class PostPage(BlogHandler): #something must be wrong here, but I cannot figure 
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
         post = db.get(key)
         error_comment = "The Comment cannot be empty"
-        comments = self.request.get('comments')
-        if comments:
-            save_comment = Reply(parent=blog_key(), content=comments, user=self.user, post_info=post)
-            save_comment.put()
+        number1_button = self.request.get('comment_button')
+        number2_button = self.request.get('like_button')
+        like_user = list()
+        if number1_button:
+            comments = self.request.get('comments')
+            if comments and self.user:
+                save_comment = Reply(parent=blog_key(), content=comments, user=self.user, post_info=post)
+                save_comment.put()
+                self.redirect('/blog/%s' % str(post.key().id()))
+            else:
+                comments = db.GqlQuery("select * from Reply where post_info = :1 order by created desc limit 10", key)
+                self.render("permalink.html", post=post, comments=comments, error_comment=error_comment)
+        elif number2_button:
+            like_user.append(self.user.key().id())
+            like = Likes(parent=blog_key(), post_info=post, user=like_user)
+            like.put()
             self.redirect('/blog/%s' % str(post.key().id()))
-        else:
-            self.render("permalink.html", post=post, comments=db.GqlQuery("select * from Reply where post_info = :1 order by created desc limit 10", key), error_comment=error_comment)
 
 
 class NewPost(BlogHandler):

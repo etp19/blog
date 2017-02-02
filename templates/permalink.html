@@ -9,11 +9,12 @@
 						<label for="comment">Comments</label>
 						<textarea class="form-control" rows="3" name="comments" id="comment"></textarea>
 					</div>
-					<button class="btn">publish</button>
+					<input type="submit" class="btn" value="Publish" name="comment_button">
+					<input type="hidden" value="update" id="like" class="btn" name="like_button">
+					<button type="submit" class="btn btn-primary">Like {{like.count()}}</button>
 				</form>
 				<div><p>{{ error_comment }}</p></div>
-
-			</div>
+			 </div>
 	</div>
 	<div class="row">
 			<div class="col-md-12">
