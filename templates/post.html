@@ -12,7 +12,7 @@
 	        <div class="col-md-12 espace-1"></div>
                 <div class="col-md-6">
                     <div class="col-md-3">{{ p.subject}} :</div>
-	                <div class="col-md-3"> Created by {{ p.user_post.name}}</div>
+	                <div class="col-md-3"> Created by {{ p.user_post.get().name}}</div>
                 </div>
 	            <div class="col-md-6 text-right">
 		            {{ p.created}}
@@ -22,6 +22,7 @@
                 <pre>{{ p._render_text | safe}}</pre>
             </div>
         </div>
+
 
 
 

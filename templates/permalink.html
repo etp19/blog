@@ -10,10 +10,11 @@
 						<textarea class="form-control" rows="3" name="comments" id="comment"></textarea>
 					</div>
 					<input type="submit" class="btn" value="Publish" name="comment_button">
-					<input type="hidden" value="update" id="like" class="btn" name="like_button">
-					<button type="submit" class="btn btn-primary">Like {{like.count()}}</button>
+					<input type="submit" value="like" name="like_button" class="btn btn-primary">
+
 				</form>
 				<div><p>{{ error_comment }}</p></div>
+				<div>{{like.user|count}}</div>
 			 </div>
 	</div>
 	<div class="row">
@@ -21,7 +22,7 @@
 				{% for post in comments %}
 					<div>
 						<pre class="litle-padding">{{ post.content }}
-						<p> Created by {{ post.user.name }}</p></pre>
+						<p> Created by {{ post.user.get().name }}</p></pre>
 					</div>
 				{% endfor %}
 			</div>

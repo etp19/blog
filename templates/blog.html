@@ -11,8 +11,8 @@
 				<hr>
 				{% for post in posts %}
 					<div>
-						<div><a href="/blog/{{ post.key().id() }}">{{ post.subject }}</a> :</div>
-						<div> Created by {{ post.user_post.name }}</div>
+						<div><a href="/blog/{{ post.key.id() }}">{{ post.subject }}</a> :</div>
+						<div> Created by {{ post.user_post.get().name }}</div>
 						<pre class="litle-padding">{{ post.content }}</pre>
 					</div>
 				{% endfor %}

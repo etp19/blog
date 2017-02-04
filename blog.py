@@ -5,7 +5,7 @@ import webapp2
 import jinja2
 import user_and_password
 import security
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
@@ -40,7 +40,7 @@ class BlogHandler(webapp2.RequestHandler):
         return cookie_val and security.test_security(cookie_val) #return cookie_val, this is a shortcut for if statement.
 
     def login(self, user):
-        self.set_secure_cookie('user_id', str(user.key().id()))
+        self.set_secure_cookie('user_id', str(user.key.id()))
 
     def logout(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
@@ -64,13 +64,13 @@ class MainPage(BlogHandler):
 ##### user stuff
 
 def users_key(group = 'default'):
-    return db.Key.from_path('users', group)
+    return ndb.Key('users', group)
 
 
-class User(db.Model):
-    name = db.StringProperty(required=True)
-    pw_hash = db.StringProperty(required=True)
-    email = db.StringProperty()
+class User(ndb.Model):
+    name = ndb.StringProperty(required=True)
+    pw_hash = ndb.StringProperty(required=True)
+    email = ndb.StringProperty()
 
     @classmethod
     def by_id(cls, uid):
@@ -78,7 +78,7 @@ class User(db.Model):
 
     @classmethod
     def by_name(cls, name):
-        u = cls.all().filter('name =', name).get()
+        u = cls.query(cls.name == name).get()
         return u
 
     @classmethod
@@ -99,77 +99,85 @@ class User(db.Model):
 ##### blog stuff
 
 def blog_key(name='default'):
-    return db.Key.from_path('blogs', name)
+    return ndb.Key('blogs', name)
 
 
-class Post(db.Model):
-    subject = db.StringProperty(required=True)
-    content = db.TextProperty(required=True)
-    created = db.DateTimeProperty(auto_now_add=True)
-    last_modified = db.DateTimeProperty(auto_now=True)
-    user_post = db.ReferenceProperty(User, collection_name='users')
+class Post(ndb.Model):
+    subject = ndb.StringProperty(required=True)
+    content = ndb.TextProperty(required=True)
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    last_modified = ndb.DateTimeProperty(auto_now=True)
+    user_post = ndb.KeyProperty(kind=User)
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("post.html", p=self)
 
 
-class Reply(db.Model):#check this, it is the database for the comments
-    content = db.StringProperty(required=True)
-    post_info = db.ReferenceProperty(Post, collection_name='posts')
-    created = db.DateTimeProperty(auto_now_add=True)
-    last_modified = db.DateTimeProperty(auto_now=True)
-    user = db.ReferenceProperty(User, collection_name='users1')
+class Reply(ndb.Model):#check this, it is the database for the comments
+    content = ndb.StringProperty(required=True)
+    post_info = ndb.KeyProperty(kind=Post)
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    last_modified = ndb.DateTimeProperty(auto_now=True)
+    user = ndb.KeyProperty(kind=User)
 
 
-class Likes(db.Model): #start working from here.
-    post_info = db.ReferenceProperty(Post, collection_name='posts1')
-    user = db.ListProperty(item_type=long)
-
+class Likes(ndb.Model): #start working from here.
+    post_info = ndb.KeyProperty(kind=Post)
+    user = ndb.KeyProperty(kind=Post, repeated=True)
 
 
 class BlogFront(BlogHandler):
     def get(self):
-        posts = db.GqlQuery("select * from Post order by created desc limit 10")
+        posts = ndb.gql("select * from Post order by created desc limit 10")
         self.render("blog.html", posts=posts)
 
 
 class PostPage(BlogHandler): #something must be wrong here, but I cannot figure out what it is.
     def get(self, post_id):
-        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-        post = db.get(key)
+        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        post = key.get()
         if not post:
             self.error(404)
             return
-        comments = db.GqlQuery("select * from Reply where post_info = :1 order by created desc limit 10", key)
-        like = db.GqlQuery("select * from Likes where post_id="+post_id)
+        comments = ndb.gql("select * from Reply where post_info = :1 order by created desc limit 10", key)
+        like = ndb.gql("select * from Likes where post_info= :1", key)
         self.render("permalink.html", post=post, comments=comments, like=like)
 
     def post(self, post_id): # Last updated here...
         if not self.user:
             self.redirect('/blog/login')
-        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-        post = db.get(key)
+        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        post = key.get()
         error_comment = "The Comment cannot be empty"
         number1_button = self.request.get('comment_button')
         number2_button = self.request.get('like_button')
-        like_user = list()
         if number1_button:
             comments = self.request.get('comments')
             if comments and self.user:
-                save_comment = Reply(parent=blog_key(), content=comments, user=self.user, post_info=post)
+                save_comment = Reply(parent=blog_key(), content=comments, user=self.user.key, post_info=post.key)
                 save_comment.put()
-                self.redirect('/blog/%s' % str(post.key().id()))
+                self.redirect('/blog/%s' % str(post.key.id()))
             else:
-                comments = db.GqlQuery("select * from Reply where post_info = :1 order by created desc limit 10", key)
-                self.render("permalink.html", post=post, comments=comments, error_comment=error_comment)
+                comments = ndb.gql("select * from Reply where post_info = :1 order by created desc limit 10", key)
+                like = ndb.gql("select * from Likes where post_info= :1", key)
+                self.render("permalink.html", post=post, comments=comments, error_comment=error_comment, like=like)
         elif number2_button:
-            like_user.append(self.user.key().id())
-            like = Likes(parent=blog_key(), post_info=post, user=like_user)
-            like.put()
-            self.redirect('/blog/%s' % str(post.key().id()))
+            result = Likes.query(Likes.post_info == key).get()
+            if result:
+                user_like = result.user
+                user_like.append(self.user.key.id())
+                add_like = Likes(parent=blog_key(), post_info=post, user=user_like)
+                add_like.put()
+                self.redirect('/blog/%s' % str(post.key.id()))
+            else:
+                user_list = [self.user.key.id()]
+                some = Likes(parent=blog_key(), post_info=post, user=user_list)
+                some.put()
+                self.redirect('/blog/%s' % str(post.key.id()))
 
 
+#check from here for changes in database.
 class NewPost(BlogHandler):
     def get(self):
         if self.user:
@@ -185,9 +193,9 @@ class NewPost(BlogHandler):
         content = self.request.get('blog_content')
 
         if subject and content:
-            p = Post(parent=blog_key(), user_post=self.user, subject=subject, content=content)
-            p.put()
-            self.redirect('/blog/%s' % str(p.key().id()))
+            p = Post(parent=blog_key(), user_post=self.user.key, subject=subject, content=content)
+            p_key = p.put()
+            self.redirect('/blog/%s' % str(p_key.id()))
         else:
             error = "subject and content, please!"
             self.render("newpost.html", subject=subject, blog_content=content, error=error)
@@ -276,6 +284,14 @@ class Welcome(BlogHandler):
             self.redirect('blog/signup')
 
 
+class ShowUser(BlogHandler):
+    def get(self):
+        if self.user:
+            self.render("base.html", user=self.user.name)
+        else:
+            pass
+
+
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/?', BlogFront),
                                ('/blog/([0-9]+)', PostPage),
@@ -283,7 +299,8 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/signup', Register),
                                ('/logout', Logout),
                                ('/blog/welcome', Welcome),
-                               ('/blog/login', Login)
+                               ('/blog/login', Login),
+                               ('/blog/', ShowUser)
                                ],
                               debug=True)
 
