@@ -1,0 +1,252 @@
+img, embed, object, video {
+
+    max-width: 100%;
+}
+
+a {
+
+    transition: all 0.35s;
+}
+p{
+
+    color: white;
+}
+
+
+/*{
+
+    outline: 2px solid red;
+}
+*/
+html, body {
+
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    font-family: 'Open Sans',sans-serif;
+}
+
+header{
+    display: block;
+    width: 100vw;
+    background-size: cover;
+    background-position: top center;
+    background-image: url("../img/production/stocks.jpg");
+    position: relative;
+    color: #fff;
+    text-align: center;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.explain {
+
+    margin-top: 10px;
+
+}
+
+footer {
+
+    background-color: #333;
+    background-size: cover;
+    background-position: center;
+    height: 180px;
+}
+
+.advertising {
+
+    background-color: #f05f40;
+    height: 300px;
+    padding-top: 40px;
+    padding-left: 25%;
+    padding-right: 25%;
+    color: white;
+    text-align: center;
+}
+
+section {
+    padding-bottom: 15px;
+    display: block;
+}
+
+.fa-bolt, .fa-mobile, .fa-money, .fa-user-circle, .fa-user-circle-o,
+.fa-facebook-square, .fa-github, .fa-instagram {
+
+    color: #f05f40;
+}
+
+hr {
+
+    border: 0 none;
+    color: black;
+    height: 2px;
+    background-color: #f05f40;
+    width: 15%;
+
+}
+
+.announce{
+
+
+    margin-top: 10%;
+    height: 100vh;
+    width: 100%;
+
+
+}
+
+
+h1 {
+    font-family: 'Raleway', sans-serif;
+    text-align: center;
+    color: #333;
+    font-weight: 400;
+}
+
+h4 {
+
+    font-family: 'Raleway', sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+}
+
+h3 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+
+}
+
+img{
+
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.navbar-default{
+
+    background-color: transparent;
+    border: transparent;
+}
+
+.menu {
+
+    height: 100vh;
+    text-align: start;
+}
+
+nav.appear {
+
+    background-color: #333;
+
+}
+
+button {
+
+    color: white;
+}
+
+.small {
+
+    width: 8%;
+}
+
+.espace {
+
+    height: 150px;
+}
+
+.contacts {
+
+    margin: 30px 0;
+
+}
+
+@media only screen and (max-width: 770px) {
+.navbar-default{
+
+    background-color: #333;
+    border: transparent;
+}
+    .espace {
+
+    height: 20px;
+}
+.pull-off {
+
+    padding-top: 50px;
+    padding-bottom: 50px;
+
+}
+.unique {
+font-size: 40px !important;
+
+}
+.unique-2{
+
+    font-size: 20px !important;
+}
+.announce {
+
+    margin-top: 18% !important;
+}
+.texts1 {
+
+    font-size: 20px !important;
+}
+.texts2 {
+
+    font-size: 17px !important;
+}
+
+
+}
+
+.img-responsive{
+
+    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.3);
+}
+
+.unique {
+
+    text-transform: uppercase;
+    font-weight: 500;
+    color: white;
+    font-size: 75px;
+    margin-right: 65%;
+}
+
+.unique-2 {
+
+    font-weight: 500;
+    color: white;
+    font-size: 40px;
+    margin-right: 65%;
+
+}
+
+.unique-3 {
+
+    margin-right: 65%;
+    background-color: #f05f40;
+    margin-top: 10px;
+}
+
+section#modal{
+
+    width: 300px;
+    height: 230px;
+    background-color: white;
+    margin-left: 83%;
+    margin-top: 45px;
+    color: #0f0f0f;
+    border-radius: 5px;
+    box-shadow: 0 0 10px 4px;
+}
+
+.login {
+
+    background-color: #f05f40;
+}

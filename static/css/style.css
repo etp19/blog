@@ -1,0 +1,44 @@
+/* Custom Stylesheet */
+/**
+ * Use this file to override Materialize files so you can update
+ * the core Materialize files in the future
+ *
+ * Made By MaterializeCSS.com
+ */
+
+.icon-block {
+  padding: 0 15px;
+}
+.icon-block .material-icons {
+	font-size: inherit;
+}
+.middle{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+
+}
+.espacer{
+    height: 80px;
+}
+.colors{
+    background-color: #e9ece5;
+}
+.collection{
+    border: none;
+    padding-top: 0!important;
+    padding-bottom: 0!important;
+    margin-top: 0!important;
+    margin-bottom: 0!important;
+    height: 70px;
+
+}
+div.card-action.take-width{
+    padding-top: 0!important;
+    padding-bottom: 0!important;
+    padding-left: 0;
+}
+img.circle.fix-avatar{
+    margin-top: 7px !important;
+}

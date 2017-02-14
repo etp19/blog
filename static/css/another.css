@@ -1,0 +1,49 @@
+.espace-1 {
+
+    height: 100px;
+}
+
+.espace-2 {
+
+    padding-top: 10px;
+}
+
+hr {
+
+    border: 0 none;
+    color: black;
+    height: 1px;
+    background-color: #F05F40;
+    width: 100%;
+}
+
+.top-margin-blog{
+
+    margin-top: 80px ;
+}
+
+.litle-padding{
+
+    margin-top: 10px;
+}
+
+.btn {
+
+    background-color: #F05F40;
+    color: black;
+}
+
+.orange {
+
+    color: #F05F40;
+}
+
+a {
+
+    text-decoration: none !important;
+}
+
+.between {
+
+    height: 20px;
+}

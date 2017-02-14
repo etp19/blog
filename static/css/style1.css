@@ -1,0 +1,86 @@
+/* {
+
+    outline: 2px solid red;
+}
+*/
+html,
+body,
+header,
+.view {
+    height: 100%;
+}
+/* Navigation*/
+
+.module {
+    background:
+        linear-gradient(
+        rgba(0,0,0,0.6),
+        rgba(0,0,0,0.6)
+        ),
+    url(../img/production/view2.jpeg);
+    background-size: cover;
+    position: relative;
+
+}
+
+.login {
+
+    width: 400px;
+    margin-top: 31%;
+    margin-left: 49%;
+}
+
+.signup {
+
+    width: 450px;
+    margin-top: 20%;
+    margin-left: 49%;
+}
+.prefix_normal {
+
+    width: 3rem;
+    position: absolute;
+    margin-left: -3rem;
+    font-size: 25px !important;
+}
+
+.prefix {
+
+    width: 3rem;
+    position: absolute;
+    margin-left: -2.8rem;
+    font-size: 34px !important;
+}
+
+.get-margin {
+
+    margin-left: 3rem;
+}
+
+.mdl-textfield__label:after{
+
+    background-color: #F05f40;
+
+}
+
+.mdl-textfield--floating-label.is-focused .mdl-textfield__label, .mdl-textfield--floating-label.is-dirty .mdl-textfield__label, .mdl-textfield--floating-label.has-placeholder .mdl-textfield__label{
+    color: #F05f40;
+
+  }
+
+.mdl-card__title {
+
+    background-color: #F05f40;
+}
+
+button {
+
+    background-color: #F05f40 !important;
+    margin-left: 2rem !important;
+}
+
+.error {
+
+    color: red;
+
+}

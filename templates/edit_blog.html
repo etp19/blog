@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+	<div class="container top-margin-blog">
+		<form action="" method="post" role="form">
+			<legend>Edit Blog</legend>
+
+			<div class="form-group">
+				<div>
+					<label for="title">Title</label>
+					<input type="text" class="form-control" name="update_title" id="title" placeholder="title" value="{{ title }}">
+				</div>
+				<div class="between"></div>
+				<div class="post">
+					<label for="content">Blog</label>
+					<textarea class="form-control" rows="5" name="update_content" id="content" placeholder="Write your text here">{{ blog_content }}</textarea>
+				</div>
+				<div class="error">
+					<p>{{ error }}</p>
+					<p class="accepted">{{ accepted }}</p>
+				</div>
+			</div>
+
+
+
+			<input type="submit" class="btn" name="update" value="update">
+			<input type="submit" class="btn" name="cancel" value="cancel">
+		</form>
+	</div>
+
+{% endblock %}

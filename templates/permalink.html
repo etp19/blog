@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {{post.render()| safe}}
+	<div class="row">
+			<div class="col-md-12">
+				<form action="" method="post" role="form">
+					<div class="form-group">
+						<label for="comment">Comments</label>
+						<textarea class="form-control" rows="3" name="comments" id="comment"></textarea>
+					</div>
+					<input type="submit" class="btn" value="Publish" name="comment_button">
+					<input type="submit" value="like {{like.get().user|count}}" name="like_button" class="btn btn-primary">
+					{% if user_delete %}
+						<input type="submit" class="btn" value="Delete Post" name="delete">
+					{% endif %}
+
+				</form>
+				<div><p>{{ error_comment }}</p></div>
+			 </div>
+	</div>
+	<div class="row">
+			<div class="col-md-12">
+				{% for post in comments %}
+					<div>
+						<pre class="litle-padding">{{ post.content }}
+						<p> Created by {{ post.user_replay }}</p></pre>
+					</div>
+				{% endfor %}
+			</div>
+	</div>
+{% endblock %}

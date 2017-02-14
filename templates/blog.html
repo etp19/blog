@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+       <div class="section no-pad-bot" id="index-banner">
+    <div class="container">
+      <br><br>
+      <h1 class="header center orange-text">Write Blogs To Help People</h1>
+      <div class="row center">
+        <h5 class="header col s12 light">Together we can create, design and learn by sharing our experiences</h5>
+      </div>
+      <div class="row center">
+        <a href="http://materializecss.com/getting-started.html" id="download-button" class="btn-large waves-effect waves-light orange">Start Inspiring Us</a>
+      </div>
+      <br><br>
+
+    </div>
+  </div>
+
+
+  <div class="container">
+    <div class="section">
+
+      <!--   Card Section   -->
+      <div class="row">
+          {% for post in posts %}
+                <div class="col s12 m4">
+                    <div class="card">
+                        <div class="take-width card-action">
+                            <ul class="collection">
+                                <li class="collection-item avatar">
+                                    <img src="http://placekitten.com/g/50/50" alt="" class="circle">
+                                    <span class="title"> Writer by</span>
+                                    <p>{{ post.user_name }}</p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-image">
+                            <img src="http://placekitten.com/g/300/230">
+                        </div>
+                        <div class="card-content">
+                            <span class="card-title">{{ post.subject }}</span>
+                            <p>{{ post.content }}</p>
+                        </div>
+                        <div class="card-action">
+                            <a href="#">Continue Reading</a>
+                        </div>
+                    </div>
+                </div>
+           {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
