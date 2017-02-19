@@ -1,33 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>Blog</title>
-	<link href="../bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
-	<link href="../static/css/another.css" rel="stylesheet" type="text/css">
-</head>
-<body>
-	<div class="container">
-        <div class="row">
-	        <div class="col-md-12 espace-1"></div>
-                <div class="col-md-6">
-                    <div class="col-md-3">{{ p.subject}} :</div>
-	                <div class="col-md-3"> Created by {{ p.user_name}}</div>
-                </div>
-	            <div class="col-md-6 text-right">
+{% extends "base.html" %}
+{% block styles %}
 
-					<a href="/blog/edit/{{ p.key.id() }}">Edit Blog: </a>
-		            {{ p.created}}
-	            </div>
-	        <hr>
-            <div class="col-md-12 espace-2">
-                <pre>{{ p._render_text | safe}}</pre>
+
+    <div class="container">
+        <div class="section">
+            <div class="row">
+                <div class="col l12 m12 s12">
+                    <div class="card">
+                        <div class="card-image">
+                            <img class="img-responsive" src="http://lorempixel.com/884/200/">
+                            <a class="btn-floating halfway-fab waves-effect waves-light blue" href="/blog/edit/{{ p.key.id() }}"><i class="material-icons">mode_edit</i></a>
+                        </div>
+                        <div class="card-content">
+                            <!--put time and date here-->
+                            <ul class="collection">
+                                <li class="collection-item avatar">
+                                    <img src="http://placekitten.com/g/50/50" alt="" class="circle">
+                                    <span class="title"> Writer by</span>
+                                    <p class="flow-text">{{ p.user_name}}</p>
+                                    <p class="secondary-content">{{ p.last_modified.strftime("%b %d, %Y") }}</p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="center">{{ p.subject }}</h3>
+                            <p class="flow-text font-content">{{ p._render_text | safe}}
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
-
-
-
-	</div>
-</body>
-
+    </div>
+{% endblock %}

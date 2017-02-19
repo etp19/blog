@@ -1,32 +1,80 @@
 {% extends "base.html" %}
 
 {% block content %}
-  {{post.render()| safe}}
-	<div class="row">
-			<div class="col-md-12">
-				<form action="" method="post" role="form">
-					<div class="form-group">
-						<label for="comment">Comments</label>
-						<textarea class="form-control" rows="3" name="comments" id="comment"></textarea>
-					</div>
-					<input type="submit" class="btn" value="Publish" name="comment_button">
-					<input type="submit" value="like {{like.get().user|count}}" name="like_button" class="btn btn-primary">
-					{% if user_delete %}
-						<input type="submit" class="btn" value="Delete Post" name="delete">
-					{% endif %}
 
-				</form>
-				<div><p>{{ error_comment }}</p></div>
-			 </div>
-	</div>
-	<div class="row">
-			<div class="col-md-12">
-				{% for post in comments %}
-					<div>
-						<pre class="litle-padding">{{ post.content }}
-						<p> Created by {{ post.user_replay }}</p></pre>
-					</div>
-				{% endfor %}
-			</div>
-	</div>
+  {{post.render()| safe}}
+
+
+    <div class="container">
+        <div class="row">
+            <div class="col l12 center-align">
+                <h4 class="flow-text">Latest Comments</h4>
+                <form method="post">
+                    <input type="submit" value="&#xE8DC; like {{like.get().user|count}}" name="like_button" class="btn waves-effect waves-light blue right center-on-small-only icon">
+                    {% if user_delete %}
+                        <input type="submit" class="btn right center-on-small-only red" value="Delete Post" name="delete">
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s12 l12 m12">
+                <div class="card-content">
+                    <div class="card">
+                        <div class="card-content blue-grey lighten-5">
+                            <form method="post">
+                                <div class="input-field">
+                                    <i class="material-icons prefix">account_circle</i>
+                                    <input type="text" id="text" name="comments" class="validate">
+                                    <label for="text">Join Discussion</label>
+                                    <input class="btn waves-effect waves-light blue right icon" value="&#xE163;" name="comment_button" type="submit">
+                                </div>
+                            </form>
+                         </div>
+
+                        <div class="card-content blue-grey lighten-5">
+                            {% for comment in comments %}
+                                <div>
+                                    <ul class="collection">
+                                        <li class="collection-item avatar blue-grey lighten-5">
+                                          <img src="http://placekitten.com/g/50/50" alt="" class="circle">
+                                          <span class="title">Created By</span>
+                                          <p class="flow-text">{{ comment.user_replay }}</p>
+                                            <p class="secondary-content">{{ comment.created.strftime("%b %d, %Y") }}</p>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p class="flow-text">{{ comment.content }}</p>
+                                    <a class='dropdown-button blue-grey lighten-5 right' href='#' data-activates='dropdown1'><i class="material-icons">more_vert</i></a>
+
+                                      <!-- Dropdown Structure -->
+                                      <ul id='dropdown1' class='dropdown-content'>
+                                        <li><a href="/blog/comment/{{ comment.key.id() }}">Edit</a></li>
+                                        <li><a type="submit" href="/blog/comment_delete/{{ comment.key.id() }}">Delete</a></li>
+                                      </ul>
+                                </div>
+                                <div class="comment_space"></div>
+
+
+                            {% endfor %}
+                        </div>
+                        </div>
+
+                    </div>
+                    {% if error_like %}
+                         <div class="card-panel red darken-1"><h6 class="center white-text">{{ error_like }}</h6></div>
+                    {% endif %}
+                    {% if error_comment %}
+                         <div class="card-panel red darken-1"><h6 class="center white-text">{{ error_comment }}</h6></div>
+                    {% endif %}
+
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
+
+<!--<a class="btn-floating halfway-fab waves-effect waves-light red" href="/blog/edit/{{ p.key.id() }}"><i class="material-icons">mode_edit</i></a>
+<input class="btn waves-effect halfway-fab waves-light green right" name="comment_button" type="submit" value="publish comment">
+

@@ -2,23 +2,52 @@
 {% block content %}
 
 
-       <div class="section no-pad-bot" id="index-banner">
-    <div class="container">
-      <br><br>
-      <h1 class="header center orange-text">Write Blogs To Help People</h1>
-      <div class="row center">
-        <h5 class="header col s12 light">Together we can create, design and learn by sharing our experiences</h5>
-      </div>
-      <div class="row center">
-        <a href="http://materializecss.com/getting-started.html" id="download-button" class="btn-large waves-effect waves-light orange">Start Inspiring Us</a>
-      </div>
-      <br><br>
-
-    </div>
+   <div class="slider">
+    <ul class="slides">
+      <li>
+        <img class="responsive-img" src="/static/img/production/slide_1.jpg"> <!-- random image -->
+        <div class="caption center-align">
+          <h3 class="font">Welcome to Eduardo Torres Blog!</h3>
+          <h5 class=""></h5>
+        </div>
+      </li>
+      <li>
+        <img class="responsive-img" src="/static/img/production/office.jpg"> <!-- random image -->
+        <div class="caption left-align">
+          <h3>Write Blogs To Help People</h3>
+          <h5 class="light grey-text text-lighten-3">Together we can create, design and learn by sharing our experiences</h5>
+            <a class="waves-effect waves-light btn" href="/blog/newpost">Inspire Us</a>
+        </div>
+      </li>
+      <li>
+        <img class="responsive-img" src="/static/img/production/blog.jpg"> <!-- random image -->
+        <div class="caption right-align">
+          <h3 class="">Keep up with the latest in</h3>
+          <h5 class="">Technology Sport Travel News </h5>
+            <a class="waves-effect waves-light btn" href="/blog/login">Login</a>
+        </div>
+      </li>
+      <li>
+        <img class="responsive-img" src="/static/img/production/communities.jpg"> <!-- random image -->
+        <div class="caption center-align">
+          <h3>We All Together</h3>
+          <h5 class="light grey-text text-lighten-3">Help us to build communities</h5>
+            <a class="waves-effect waves-light btn" href="/blog/signup">Join Us</a>
+        </div>
+      </li>
+    </ul>
   </div>
 
 
   <div class="container">
+    <div class="section">
+        <div class="row">
+            <div class="col l12 m12 s12">
+                <h3 class="center teal-text text-lighten-2">Latest Blog</h3>
+                <hr>
+            </div>
+        </div>
+    </div>
     <div class="section">
 
       <!--   Card Section   -->
@@ -26,7 +55,7 @@
           {% for post in posts %}
                 <div class="col s12 m4">
                     <div class="card">
-                        <div class="take-width card-action">
+                        <div class="card-action">
                             <ul class="collection">
                                 <li class="collection-item avatar">
                                     <img src="http://placekitten.com/g/50/50" alt="" class="circle">
@@ -36,14 +65,14 @@
                             </ul>
                         </div>
                         <div class="card-image">
-                            <img src="http://placekitten.com/g/300/230">
+                            <img src="http://lorempixel.com/300/230/sports">
                         </div>
-                        <div class="card-content">
+                        <div class="card-content middle">
                             <span class="card-title">{{ post.subject }}</span>
-                            <p>{{ post.content }}</p>
+                            <p class="truncate">{{ post.content }}</p>
                         </div>
                         <div class="card-action">
-                            <a href="#">Continue Reading</a>
+                            <a href="/blog/{{ post.key.id() }}">Continue Reading</a>
                         </div>
                     </div>
                 </div>

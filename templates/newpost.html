@@ -15,17 +15,20 @@
             <div class="row espacer"></div>
             <div class="row">
                 <div class="col s12 m2"></div>
-                <div class="col s12 m10 middle">
-                    <form action="#" method="post" role="form">
-                        <div class=" no-pad-bot input-field col s4 center-align">
+                <div class="col s12 m10">
+                    <form method="post" role="form">
+                        <div class=" no-pad-bot input-field col s4">
                             <input id="title" name="title" type="text" class="validate" value="{{title}}">
                             <label for="title">Blog Title</label>
                         </div>
+                        <div class="row espacer-2"></div>
                         <div class="input-field">
                             <textarea id="textarea1" name="blog_content" class="materialize-textarea">{{ blog_content }}</textarea>
                             <label for="textarea1">Start putting your ideas here:</label>
                         </div>
-                        <a class="waves-effect waves-light btn-large center-align"><input type="submit">Publish Now</a>
+                        <button class="btn waves-effect waves-light btn-large" type="submit">Publish Now</button>
+                        <a class="waves-effect waves-light btn-large center-align pink" href="/blog">Cancel</a>
+                        <a class="btn-floating btn-large waves-effect waves-light pink"><i class="material-icons">add_a_photo</i></a>
                     </form>
                 </div>
                 <div class="col s12 m2">
@@ -33,11 +36,6 @@
                                 <p>{{ error }}</p>
                                 <p>{{ accepted }}</p>
                     </div>
-                </div>
-                <div class="row">
-                    <a class="waves-effect waves-light btn-large center-align pink">Cancel</a>
-                    <a class="btn-floating btn-large waves-effect waves-light pink"><i class="material-icons">add_a_photo</i></a>
-
                 </div>
             </div>
         </div>

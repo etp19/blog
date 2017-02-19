@@ -5,6 +5,18 @@
  *
  * Made By MaterializeCSS.com
  */
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1 0 auto;
+  }
+h6{
+    font-weight: bold;
+}
 
 .icon-block {
   padding: 0 15px;
@@ -41,4 +53,38 @@ div.card-action.take-width{
 }
 img.circle.fix-avatar{
     margin-top: 7px !important;
+}
+.espacer-2{
+    height: 200px;
+}
+/*This area is for styling login and signup forms*/
+.custom{
+    height: 100vh;
+    width: 100%;
+    margin-left: 0;
+}
+.set-height-signup{
+    height: 585px!important;
+}
+.set-height-login{
+    height: 400px!important;
+
+}
+.fix-height{
+    height: 70px;
+}
+.vertical{
+    padding-top: 10px;
+}
+.comment_space{
+    height:20px;
+}
+.font{
+    font-family: 'Lobster Two', cursive;
+}
+.font-content{
+    font-family: 'Josefin Slab', serif;
+}
+.icon{
+    font-family: Material Icons ,'Helvetica Neue', Helvetica, Arial, sans-serif !important;;
 }
