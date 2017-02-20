@@ -566,4 +566,4 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/comment_delete/([0-9]+)', DeleteComment)
                                ],
                               debug=True)
-#
+
