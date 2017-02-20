@@ -3706,7 +3706,7 @@ if (jQuery) {
     init : function(options) {
       var defaults = {
         indicators: true,
-        height: 400,
+        height: 500,
         transition: 500,
         interval: 6000
       };

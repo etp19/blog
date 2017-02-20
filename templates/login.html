@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
     <title>login</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="../materialize/css/materialize.css" type="text/css" rel="stylesheet" media="screen,projection"/>
-    <link href="../static/css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+    <link href="/materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+    <link href="/static/css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
 </head>
 <body class="teal lighten-1">
     <div class="container">
@@ -20,10 +20,12 @@
                 </div>
                 <div class="col l6 s12 custom">
                     <div class="espacer-2">
-                        <h4 class="white-text hide-on-large-only">Don't have an account with us, do not worry !!</h4>
-                                <button class="btn waves-effect waves-light green white-text hide-on-large-only" type="submit" name="action">Register
-                                <i class="material-icons right white-text hide-on-large-only">account_circle</i>
+                        <div class="hide-on-large-only hide-on-med-only">
+                            <h4 class="white-text">Don't have an account with us, do not worry !!</h4>
+                                <button class="btn waves-effect waves-light blue darken-1" type="submit" name="action">
+                                    <a class="white-text" href="/blog/signup">register</a><i class="material-icons right">perm_identity</i>
                                 </button>
+                        </div>
                     </div>
                     <div class="section">
                         <div class="row">
@@ -76,8 +78,8 @@
 
     </div>
 
-<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-  <script src="../materialize/js/materialize.js"></script>
-  <script src="../static/js/init.js"></script>
+<script src="/static/js/jquery-3.1.1.min.js"></script>
+  <script src="/materialize/js/materialize.js"></script>
+  <script src="/static/js/init.js"></script>
 </body>
 </html>

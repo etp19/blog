@@ -21,6 +21,9 @@ def render_str(template, **params):
 
 
 class BlogHandler(webapp2.RequestHandler):
+    """ Template stuff, this facilitate handles requests such as
+        write, redirection and render.
+    """
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
@@ -32,20 +35,24 @@ class BlogHandler(webapp2.RequestHandler):
         self.write(self.render_str(template, **kw))
 
     def set_secure_cookie(self, name, val):
+        # set the cookie
         cookie_val = security.make_hash(val)
         self.response.headers.add_header(
             'Set-Cookie',
             '%s=%s; Path=/' % (name, cookie_val))
 
     def read_secure_cookie(self, name):
+        # read the cookie
         cookie_val = self.request.cookies.get(name)
         return cookie_val and security.test_security(
             cookie_val)  # return cookie_val, this is a shortcut for if statement.
 
     def login(self, user):
+        # set the cookie value using user id
         self.set_secure_cookie('user_id', str(user.key.id()))
 
     def logout(self):
+        # remove cookie
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
     def initialize(self, *a, **kw):
@@ -59,7 +66,7 @@ def render_post(response, post):
     response.out.write(post.content)
 
 
-#blog main page
+# blog main page
 class MainPage(BlogHandler):
     def get(self):
         self.render("blog.html")
@@ -148,7 +155,6 @@ class Reply(ndb.Model):
         return self.user.get().name
 
 
-
 class Likes(ndb.Model):
     """
         Create a class to store likes in Google datastore with ndb client, I use repeate
@@ -219,11 +225,17 @@ class PostPage(BlogHandler):
                             user_delete=True)
         elif number2_button:
             """
-                Handle the likes session, it queries the likes and test if user exist and if he is
-                not the post author
+                Handles the likes session, it queries the likes and test if user exist and if he is
+                not the post author in order to add a like.
             """
             result = Likes.query(Likes.post_info == key).get()
             if self.user:
+                """
+                    If is not the same user it will proceed to add it to
+                    a python list and stored in datastore,
+                    if user id is already in the list it will be
+                    removed
+                """
                 if not self.user.key == post.user_post:
                     if result:
                         user_like = result.user
@@ -236,16 +248,19 @@ class PostPage(BlogHandler):
                             result.put()
                             self.redirect('/blog/%s' % str(post.key.id()))
                     else:
+                        # first time user will make the list.
                         user_list = [self.user.key.id()]
                         some = Likes(parent=blog_key(), post_info=post.key, user=user_list)
                         some.put()
                         self.redirect('/blog/%s' % str(post.key.id()))
                 else:
+                    # user not login will render the same page again.
                     comments = ndb.gql("select * from Reply where post_info = :1 order by created desc limit 10", key)
                     like = ndb.gql("select * from Likes where post_info= :1", key)
                     self.render("permalink.html", post=post, comments=comments, error_like=error_like, like=like,
                                 user_delete=True)
         elif delete_request:
+            # delete the blog
             post.key.delete()
             self.redirect('/blog')
 
@@ -254,6 +269,9 @@ class PostPage(BlogHandler):
 
 
 class NewPost(BlogHandler):
+    """
+        This is the class responsible for creating new blog posts
+    """
     def get(self):
         if self.user:
             self.render("newpost.html")
@@ -266,7 +284,7 @@ class NewPost(BlogHandler):
 
         subject = self.request.get('title')
         content = self.request.get('blog_content')
-
+        # if there is a post it will be stored in database
         if subject and content:
             p = Post(parent=blog_key(), user_post=self.user.key, subject=subject, content=content)
             p_key = p.put()
@@ -277,6 +295,9 @@ class NewPost(BlogHandler):
 
 
 class Signup(BlogHandler):
+    """
+        Class that handle the user signup form and test for validations
+    """
     def get(self):
         self.render("signup.html")
 
@@ -287,9 +308,10 @@ class Signup(BlogHandler):
         self.verify = self.request.get('verify')
         self.email = self.request.get('email')
         self.phone = self.request.get('phone')
+        # dictionary store error messages
         params = dict(username=self.username,
                       email=self.email)
-
+        # validate parameters
         if not user_and_password.validate_user(self.username):
             params['error_username'] = "That's not a valid username."
             have_error = True
@@ -315,21 +337,33 @@ class Signup(BlogHandler):
 
 
 class Register(Signup):
+    """
+        Use the inputs to register the new user in datastore
+    """
     def done(self):
         # make sure the user doesn't already exist
         u = User.by_name(self.username)
         if u:
             msg = 'That user already exists.'
-            self.render('signup.html', error_username=msg)
+            self.render('signup.html', error_username=msg, error=True)
         else:
-            u = User.register(self.username, self.password, self.email, int(self.phone))
-            u.put()
+            if isinstance(self.phone, int):
+                u = User.register(self.username, self.password, self.email, self.phone)
+                u.put()
+            else:
+                u = User.register(self.username, self.password, self.email)
+                u.put()
+
 
             self.login(u)
             self.redirect('/blog')
 
 
 class Login(BlogHandler):
+    """
+        Handle the user login form, test if username and password match
+        with the one in database.
+    """
     def get(self):
         self.render('login.html')
 
@@ -347,12 +381,19 @@ class Login(BlogHandler):
 
 
 class Logout(BlogHandler):
+    """
+        Use this class to logout the user by deleting the user cookie.
+    """
     def get(self):
         self.logout()
         self.redirect('/blog/login')
 
 
 class ShowUser(BlogHandler):
+    """
+        This class work with base html and is designed to reflect the user name
+        in the nav bar once the user is logged
+    """
     def get(self):
         if self.user:
             self.render("base.html", user=self.user.name)
@@ -361,6 +402,10 @@ class ShowUser(BlogHandler):
 
 
 class EditHandler(BlogHandler):
+    """
+        Allow users to edit their own posts, if it is
+        not their own post it will be redirect it to main page
+    """
     def get(self, post_id):
         key = ndb.Key('Post', int(post_id), parent=blog_key())
         post = key.get()
@@ -392,10 +437,11 @@ class EditHandler(BlogHandler):
             self.redirect('/blog')
 
 
-class EditComment(PostPage):
-    def comments(self):
-        pass
-
+class EditComment(BlogHandler):
+    """
+        Allow users to edit their own comments, if it is
+        not their own post it will be redirect it to main page
+    """
     def get(self, comment_id):
         key = ndb.Key('Reply', int(comment_id), parent=blog_key())
         comments = key.get()
@@ -425,6 +471,10 @@ class EditComment(PostPage):
 
 
 class DeleteComment(BlogHandler):
+    """
+        Allow users to delete their own comments, if it is
+        not their own post it will be redirect it to main page
+    """
     def get(self, delete_id):
         key = ndb.Key('Reply', int(delete_id), parent=blog_key())
         comments = key.get()
@@ -438,8 +488,12 @@ class DeleteComment(BlogHandler):
 
 
 class NewBuild(BlogHandler):
+    """
+        handles all future projects that
+        are not available at the moment
+    """
     def get(self):
-        self.redirect("process.html")
+        self.render("process.html")
 
 
 app = webapp2.WSGIApplication([('/', MainPage),
