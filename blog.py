@@ -1,5 +1,4 @@
 import os
-import re
 import time
 import datetime
 import webapp2
@@ -8,13 +7,13 @@ import user_and_password
 import security
 from google.appengine.ext import ndb
 
-#set the location for the template folder
+# set the location for the template folder
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
                                autoescape=True)
 
 
-#render templates
+# render templates
 def render_str(template, **params):
     t = jinja_env.get_template(template)
     return t.render(params)
@@ -22,8 +21,7 @@ def render_str(template, **params):
 
 class BlogHandler(webapp2.RequestHandler):
     """ Template stuff, this facilitate handles requests such as
-        write, redirection and render.
-    """
+        write, redirection and render. """
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
@@ -44,8 +42,9 @@ class BlogHandler(webapp2.RequestHandler):
     def read_secure_cookie(self, name):
         # read the cookie
         cookie_val = self.request.cookies.get(name)
+        # return cookie_val, this is a shortcut for if statement.
         return cookie_val and security.test_security(
-            cookie_val)  # return cookie_val, this is a shortcut for if statement.
+            cookie_val)
 
     def login(self, user):
         # set the cookie value using user id
@@ -54,6 +53,24 @@ class BlogHandler(webapp2.RequestHandler):
     def logout(self):
         # remove cookie
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
+
+    def user_own_post(self, post_id):
+        # Test if user is the one that wrote the blog.
+        key = ndb.Key('Post', int(post_id), parent=blog_key())
+        post = key.get()
+        if self.user.key == post.user_post:
+            return True
+        else:
+            return False
+
+    def user_own_comment(self, comment_id):
+        # Test if user is the one that wrote the blog.
+        key = ndb.Key('Reply', int(comment_id), parent=blog_key())
+        post = key.get()
+        if self.user.key == post.user:
+            return True
+        else:
+            return False
 
     def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
@@ -69,19 +86,17 @@ def render_post(response, post):
 # blog main page
 class MainPage(BlogHandler):
     def get(self):
-        self.render("blog.html")
+        self.redirect('/blog/')
 
 
-
-#key that defines a user group
+# key that defines a user group
 def users_key(group='default'):
     return ndb.Key('users', group)
 
 
 class User(ndb.Model):
-    """
-    Create a class to store the user information in Google datastore with ndb client
-    """
+    """ Create a class to store the user information
+    in Google datastore with ndb client """
     name = ndb.StringProperty(required=True)
     pw_hash = ndb.StringProperty(required=True)
     email = ndb.StringProperty()
@@ -112,17 +127,15 @@ class User(ndb.Model):
             return u
 
 
-##### blog stuff
-
 def blog_key(name='default'):
     return ndb.Key('blogs', name)
 
 
 class Post(ndb.Model):
-    """
-        Create a class to store all the post information in Google datastore with ndb client, also
-        use kind=User to point to the User database as a many to one relationship
-    """
+    """ Create a class to store all the post information
+        in Google datastore with ndb client, also
+        use kind=User to point to the User database
+        as a many to one relationship """
     subject = ndb.StringProperty(required=True)
     content = ndb.TextProperty(required=True)
     created = ndb.DateTimeProperty(auto_now_add=True)
@@ -140,10 +153,10 @@ class Post(ndb.Model):
 
 
 class Reply(ndb.Model):
-    """
-        Create a class to store all the comments in Google datastore with ndb client, also
-        use kind=User to point to the User database as a many to one relationship
-    """
+    """ Create a class to store all the comments
+        in Google datastore with ndb client, also
+        use kind=User to point to the User database
+        as a many to one relationship """
     content = ndb.StringProperty(required=True)
     post_info = ndb.KeyProperty(kind=Post)
     created = ndb.DateTimeProperty(auto_now_add=True)
@@ -156,49 +169,57 @@ class Reply(ndb.Model):
 
 
 class Likes(ndb.Model):
-    """
-        Create a class to store likes in Google datastore with ndb client, I use repeate
-        true property in order to save a list of users id.
-    """
+    """ Create a class to store likes
+        in Google datastore with ndb client, I use repeated
+        true property in order to save a list of users id. """
     post_info = ndb.KeyProperty(kind=Post)
     user = ndb.IntegerProperty(repeated=True)
 
 
 class BlogFront(BlogHandler):
-    """
-        Render the main page and queries the most recent with a limit of 10.
-    """
+    """ Render the main page and queries the most recent
+        with a limit of 10. """
     def get(self):
         posts = ndb.gql("select * from Post order by created desc limit 10")
         self.render("blog.html", posts=posts)
 
 
 class PostPage(BlogHandler):
-    """
-        Create a class display each post individually and it handlers
-        the comments, likes and deleting each post
-    """
+    """ Create a class display each post individually
+        and it handlers the comments,
+        likes and deleting each post. """
     def get(self, post_id):
-        #get post key
+        # get post key
         key = ndb.Key('Post', int(post_id), parent=blog_key())
         post = key.get()
         if not post:
             self.error(404)
             return
-        comments = ndb.gql("select * from Reply where post_info = :1 order by created desc limit 10", key)
+        comments = ndb.gql("select * from Reply where post_info = :1 "
+                           "order by created desc limit 10", key)
         like = ndb.gql("select * from Likes where post_info= :1", key)
         if self.user:
 
             if self.user.key == post.user_post:
-                self.render("permalink.html", post=post, comments=comments, like=like, user_delete=self.user)
+                self.render("permalink.html",
+                            post=post,
+                            comments=comments,
+                            like=like,
+                            user_delete=self.user)
             else:
-                self.render("permalink.html", post=post, comments=comments, like=like)
+                self.render("permalink.html",
+                            post=post,
+                            comments=comments,
+                            like=like)
         else:
-            self.render("permalink.html", post=post, comments=comments, like=like)
+            self.render("permalink.html",
+                        post=post,
+                        comments=comments,
+                        like=like)
 
     def post(self, post_id):
         if not self.user:
-            self.redirect('/blog/login')
+            return self.redirect('/blog/login')
         key = ndb.Key('Post', int(post_id), parent=blog_key())
         post = key.get()
         error_comment = "The Comment cannot be empty"
@@ -208,96 +229,119 @@ class PostPage(BlogHandler):
         number2_button = self.request.get('like_button')
         delete_request = self.request.get('delete')
         if number1_button:
-            """
-                Handle the comment session, it test if there is a comment and if the user is login,
+            """ Handles the comment session,
+                it test if there is a comment and if the user is login,
                  if true it save it to the database if not
-                 it will render permalink with the values already storage
-            """
+                 it will render permalink with the values already storage """
             comments = self.request.get('comments')
             if comments and self.user:
-                save_comment = Reply(parent=blog_key(), content=comments, user=self.user.key, post_info=post.key)
+                save_comment = Reply(parent=blog_key(),
+                                     content=comments,
+                                     user=self.user.key,
+                                     post_info=post.key)
                 save_comment.put()
-                self.redirect('/blog/%s' % str(post.key.id()))
+                return self.redirect('/blog/%s' % str(post.key.id()))
             else:
-                comments = ndb.gql("select * from Reply where post_info = :1 order by created desc limit 10", key)
+                comments = ndb.gql("select * from Reply where post_info = :1 "
+                                   "order by created desc limit 10", key)
                 like = ndb.gql("select * from Likes where post_info= :1", key)
-                self.render("permalink.html", post=post, comments=comments, error_comment=error_comment, like=like,
-                            user_delete=True)
+                return self.render("permalink.html",
+                                   post=post,
+                                   comments=comments,
+                                   error_comment=error_comment,
+                                   like=like,
+                                   user_delete=True)
         elif number2_button:
-            """
-                Handles the likes session, it queries the likes and test if user exist and if he is
-                not the post author in order to add a like.
-            """
+            """ Handles the likes session, it queries the likes
+                and test if user exist and if he is
+                not the post author in order to add a like. """
             result = Likes.query(Likes.post_info == key).get()
             if self.user:
-                """
-                    If is not the same user it will proceed to add it to
+                """ If is not the same user it will proceed to add it to
                     a python list and stored in datastore,
                     if user id is already in the list it will be
-                    removed
-                """
-                if not self.user.key == post.user_post:
+                    removed. """
+                if not self.user_own_post(post_id):
                     if result:
                         user_like = result.user
                         if self.user.key.id() in user_like:
                             user_like.remove(self.user.key.id())
                             result.put()
-                            self.redirect('/blog/%s' % str(post.key.id()))
+                            return self.redirect('/blog/%s' % str(post.key.id()))
                         else:
                             user_like.append(self.user.key.id())
                             result.put()
-                            self.redirect('/blog/%s' % str(post.key.id()))
+                            return self.redirect('/blog/%s' % str(post.key.id()))
                     else:
                         # first time user will make the list.
                         user_list = [self.user.key.id()]
-                        some = Likes(parent=blog_key(), post_info=post.key, user=user_list)
+                        some = Likes(parent=blog_key(),
+                                     post_info=post.key,
+                                     user=user_list)
                         some.put()
-                        self.redirect('/blog/%s' % str(post.key.id()))
+                        return self.redirect('/blog/%s' % str(post.key.id()))
                 else:
                     # user not login will render the same page again.
-                    comments = ndb.gql("select * from Reply where post_info = :1 order by created desc limit 10", key)
-                    like = ndb.gql("select * from Likes where post_info= :1", key)
-                    self.render("permalink.html", post=post, comments=comments, error_like=error_like, like=like,
-                                user_delete=True)
+                    comments = ndb.gql("select * from Reply "
+                                       "where post_info = :1 "
+                                       "order by created desc limit 10", key)
+                    like = ndb.gql("select * from Likes "
+                                   "where post_info= :1", key)
+                    return self.render("permalink.html",
+                                       post=post,
+                                       comments=comments,
+                                       error_like=error_like,
+                                       like=like,
+                                       user_delete=True)
         elif delete_request:
             # delete the blog
-            post.key.delete()
-            self.redirect('/blog')
+            if self.user:
+                if self.user_own_post(post_id):
+                    post.key.delete()
+                    return self.redirect('/blog')
+                else:
+                    return self.redirect('/blog/%s' % str(post.key.id()))
+
+            else:
+                return self.redirect('/blog/login')
 
     def comments(self, *a, **kw):
         raise NotImplementedError
 
 
 class NewPost(BlogHandler):
-    """
-        This is the class responsible for creating new blog posts
-    """
+    """This is the class responsible for creating new blog posts"""
     def get(self):
         if self.user:
-            self.render("newpost.html")
+            return self.render("newpost.html")
         else:
-            self.redirect("/blog/login")
+            return self.redirect("/blog/login")
 
     def post(self):
         if not self.user:
-            self.redirect('/blog')
+            return self.redirect('/blog')
 
         subject = self.request.get('title')
         content = self.request.get('blog_content')
         # if there is a post it will be stored in database
         if subject and content:
-            p = Post(parent=blog_key(), user_post=self.user.key, subject=subject, content=content)
+            p = Post(parent=blog_key(),
+                     user_post=self.user.key,
+                     subject=subject,
+                     content=content)
             p_key = p.put()
-            self.redirect('/blog/%s' % str(p_key.id()))
+            return self.redirect('/blog/%s' % str(p_key.id()))
         else:
             error = "subject and content, please!"
-            self.render("newpost.html", subject=subject, blog_content=content, error=error)
+            return self.render("newpost.html",
+                               subject=subject,
+                               blog_content=content,
+                               error=error)
 
 
 class Signup(BlogHandler):
-    """
-        Class that handle the user signup form and test for validations
-    """
+    """ Class that handles the user signup form
+        and test for validations. """
     def get(self):
         self.render("signup.html")
 
@@ -328,42 +372,46 @@ class Signup(BlogHandler):
             have_error = True
 
         if have_error:
-            self.render('signup.html', error=have_error, **params)
+            return self.render('signup.html', error=have_error, **params)
         else:
-            self.done()
+            return self.done()
 
     def done(self, *a, **kw):
         raise NotImplementedError
 
 
 class Register(Signup):
-    """
-        Use the inputs to register the new user in datastore
-    """
+    """ Use the inputs to register the new user
+        in datastore """
     def done(self):
         # make sure the user doesn't already exist
         u = User.by_name(self.username)
         if u:
             msg = 'That user already exists.'
-            self.render('signup.html', error_username=msg, error=True)
+            return self.render('signup.html',
+                               error_username=msg,
+                               error=True)
         else:
             if isinstance(self.phone, int):
-                u = User.register(self.username, self.password, self.email, self.phone)
+                u = User.register(self.username,
+                                  self.password,
+                                  self.email,
+                                  self.phone)
                 u.put()
             else:
-                u = User.register(self.username, self.password, self.email)
+                u = User.register(self.username,
+                                  self.password,
+                                  self.email)
                 u.put()
 
-
             self.login(u)
-            self.redirect('/blog')
+            return self.redirect('/blog')
 
 
 class Login(BlogHandler):
-    """
-        Handle the user login form, test if username and password match
-        with the one in database.
-    """
+    """ Handles the user login form,
+        test if username and password match
+        with the one in database. """
     def get(self):
         self.render('login.html')
 
@@ -374,124 +422,132 @@ class Login(BlogHandler):
         u = User.login(username, password)
         if u:
             self.login(u)
-            self.redirect('/blog/')
+            return self.redirect('/blog/')
         else:
             msg = 'Invalid login'
-            self.render('login.html', invalid_login=msg)
+            return self.render('login.html', invalid_login=msg)
 
 
 class Logout(BlogHandler):
-    """
-        Use this class to logout the user by deleting the user cookie.
-    """
+    """ Use this class to logout the user
+        by deleting the user cookie. """
     def get(self):
         self.logout()
-        self.redirect('/blog/login')
+        return self.redirect('/blog/login')
 
 
 class ShowUser(BlogHandler):
-    """
-        This class work with base html and is designed to reflect the user name
-        in the nav bar once the user is logged
-    """
+    """ This class work with base html and
+        is designed to reflect the user name
+        in the nav bar once the user is logged """
     def get(self):
         if self.user:
-            self.render("base.html", user=self.user.name)
+            return self.render("base.html", user=self.user.name)
         else:
             pass
 
 
 class EditHandler(BlogHandler):
-    """
-        Allow users to edit their own posts, if it is
-        not their own post it will be redirect it to main page
-    """
+    """ Allow users to edit their own posts, if it is
+        not their own post it will be redirect it to main page """
     def get(self, post_id):
         key = ndb.Key('Post', int(post_id), parent=blog_key())
         post = key.get()
-
         if post:
             if self.user:
-                if self.user.key == post.user_post:
-
-                    self.render("edit_blog.html", title=post.subject, blog_content=post.content)
+                if self.user_own_post(post_id):
+                    return self.render("edit_blog.html",
+                                       title=post.subject,
+                                       blog_content=post.content)
                 else:
-                    self.redirect('/blog/')
+                    return self.redirect('/blog/')
 
             else:
-                self.redirect('/blog/login')
+                return self.redirect('/blog/login')
 
     def post(self, post_id):
         key = ndb.Key('Post', int(post_id), parent=blog_key())
         self.post = key.get()
         request_update = self.request.get('update')
         cancel_update = self.request.get('cancel')
-        if request_update:
-            update_title = self.request.get("update_title")
-            update_content = self.request.get("update_content")
-            self.post.subject = update_title
-            self.post.content = update_content
-            self.post.put()
-            self.redirect('/blog/%s' % str(self.post.key.id()))
-        elif cancel_update:
-            self.redirect('/blog')
+        if self.user:
+            if self.user_own_post(post_id):
+                if request_update:
+                    update_title = self.request.get("update_title")
+                    update_content = self.request.get("update_content")
+                    self.post.subject = update_title
+                    self.post.content = update_content
+                    self.post.put()
+                    return self.redirect('/blog/%s' % str(self.post.key.id()))
+                elif cancel_update:
+                    return self.redirect('/blog')
+            else:
+                return self.redirect('/blog')
+        else:
+            return self.redirect('/blog/login')
 
 
 class EditComment(BlogHandler):
-    """
-        Allow users to edit their own comments, if it is
-        not their own post it will be redirect it to main page
-    """
+    """ Allow users to edit their own comments, if it is
+        not their own post it will be redirect it to main page. """
     def get(self, comment_id):
         key = ndb.Key('Reply', int(comment_id), parent=blog_key())
         comments = key.get()
         if comments:
             if self.user:
-                if self.user.key == comments.user:
-                    self.render("edit_comment.html", blog_content=comments.content)
+                if self.user_own_comment(comment_id):
+                    return self.render("edit_comment.html",
+                                       blog_content=comments.content)
                 else:
-                    self.redirect('/blog')
+                    return self.redirect('/blog')
             else:
-                self.redirect('/blog/login')
+                return self.redirect('/blog/login')
         else:
-            self.redirect('/blog/login')
+            return self.redirect('/blog')
 
     def post(self, comment_id):
         key = ndb.Key('Reply', int(comment_id), parent=blog_key())
         comments = key.get()
-        request_update = self.request.get('update')
-        cancel_update = self.request.get('cancel')
-        if request_update:
-            update_content = self.request.get("update_comment")
-            comments.content = update_content
-            comments.put()
-            self.redirect('/blog/')
-        elif cancel_update:
-            self.redirect('/blog')
+        if self.user:
+            if self.user_own_comment(comment_id):
+                request_update = self.request.get('update')
+                cancel_update = self.request.get('cancel')
+                if request_update:
+                    update_content = self.request.get("update_comment")
+                    comments.content = update_content
+                    comments.put()
+                    return self.redirect('/blog/')
+                elif cancel_update:
+                    return self.redirect('/blog')
+            else:
+                return self.redirect('/blog')
+        else:
+            return self.redirect('/blog/login')
 
 
 class DeleteComment(BlogHandler):
-    """
-        Allow users to delete their own comments, if it is
-        not their own post it will be redirect it to main page
-    """
+    """ Allow users to delete their own comments, if it is
+        not their own post it will be redirect it to main page. """
     def get(self, delete_id):
         key = ndb.Key('Reply', int(delete_id), parent=blog_key())
         comments = key.get()
-        if self.user:
-            if self.user.key == comments.user:
-                comments.key.delete()
-                self.redirect('/blog')
+        if comments:
+            if self.user:
+                if self.user_own_comment(delete_id):
+                    comments.key.delete()
+                    return self.redirect('/blog')
+                else:
+                    return self.redirect('/blog')
 
+            else:
+                return self.redirect('/blog/login')
         else:
-            self.redirect('/blog/login')
+            return self.redirect('/blog')
 
 
 class NewBuild(BlogHandler):
-    """
-        handles all future projects that
-        are not available at the moment
-    """
+    """ handles all future projects that
+        are not available at the moment. """
     def get(self):
         self.render("process.html")
 
