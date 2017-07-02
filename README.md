@@ -7,7 +7,7 @@
 This project is a blogging website where people can write blogs about anything, User that are register can also edit, delete
 and also delete blog and comments. The website url is https://hello-world-153222.appspot.com
 
-###How to deploy the app:
+### How to deploy the app:
 
 * In order to deploy the app you will have to download Google App Engine SDK from https://cloud.google.com/appengine/docs/python/download
 * Download or clone my Github repository from https://github.com/etp19/blog.git
@@ -17,13 +17,13 @@ and also delete blog and comments. The website url is https://hello-world-153222
 
 ### Folders and Files:
 
-####Folders:
+#### Folders:
 
 - Materialize: This folder contains all the css styles, fonts and javascript files from materialize framework.
 - Static: Contains all the custom css styles, fonts and javascript files.
 - Templates: This folder contains all the necesary html templates for the application
 
-####Python Files:
+#### Python Files:
 
 - blog.py: Contains the application code including the handlers, models etc.. 
 - app.yaml: app configuration
